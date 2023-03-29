@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import pro.sky.coursework.courseworksocks.model.Colors;
+import pro.sky.coursework.courseworksocks.model.Sizes;
 import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.SocksService;
@@ -32,7 +34,10 @@ public class SocksServiceImpl implements SocksService {
     //добавление. Вопрос: именно здесь прога увидит, что в массиве нет объектов sock? И значит ли это, что массив null?
     @Override
     public boolean addSocks(Sock[] newSocks) {
-        if (newSocks != null) {
+        socks.put(new Sock(Colors.RED, Sizes.FORTY, 99, 3), 10);
+        saveToFile();
+
+        /*if (newSocks != null) {
             for (int i = 0; i < newSocks.length; i++) {
                 Integer x = socks.putIfAbsent(newSocks[i], newSocks[i].getQuantity());
                 if (x != null) {
@@ -41,8 +46,8 @@ public class SocksServiceImpl implements SocksService {
             }
             saveToFile();
             return true;
-        }
-        return false;
+        }*/
+        return true;
     }
 
     @Override

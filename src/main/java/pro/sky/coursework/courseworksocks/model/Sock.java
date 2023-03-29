@@ -1,10 +1,7 @@
 package pro.sky.coursework.courseworksocks.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
@@ -13,6 +10,7 @@ import java.awt.Color;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class Sock {
     @NonNull
     @Schema(description = "Цвет носков (Enum)")

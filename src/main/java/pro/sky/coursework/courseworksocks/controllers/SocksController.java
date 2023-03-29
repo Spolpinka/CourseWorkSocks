@@ -68,13 +68,16 @@ public class SocksController {
             }
 
     )
-    @PutMapping(value = "/addSocks", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> addSocks(Sock... socks) {
-        if (socksService.addSocks(socks)) {
+    @PutMapping(value = "/addSocks")
+    public ResponseEntity<Void> addSocks(@RequestBody Sock... socks) {
+        socksService.addSocks(socks);
+        return ResponseEntity.ok().build();
+
+        /*if (socksService.addSocks(socks)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        }*/
     }
 
     @Operation(
