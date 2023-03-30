@@ -2,15 +2,13 @@ package pro.sky.coursework.courseworksocks.services.impls;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import pro.sky.coursework.courseworksocks.model.Colors;
-import pro.sky.coursework.courseworksocks.model.Sizes;
 import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.SocksService;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +24,7 @@ public class SocksServiceImpl implements SocksService {
         this.filesService = filesService;
     }
 
-    //@PostConstruct
+    @PostConstruct
     private void init() {
         readFromFile();
     }
@@ -34,10 +32,7 @@ public class SocksServiceImpl implements SocksService {
     //добавление. Вопрос: именно здесь прога увидит, что в массиве нет объектов sock? И значит ли это, что массив null?
     @Override
     public boolean addSocks(Sock[] newSocks) {
-        socks.put(new Sock(Colors.RED, Sizes.FORTY, 99, 3), 10);
-        saveToFile();
-
-        /*if (newSocks != null) {
+        if (newSocks != null) {
             for (int i = 0; i < newSocks.length; i++) {
                 Integer x = socks.putIfAbsent(newSocks[i], newSocks[i].getQuantity());
                 if (x != null) {
@@ -46,7 +41,7 @@ public class SocksServiceImpl implements SocksService {
             }
             saveToFile();
             return true;
-        }*/
+        }
         return true;
     }
 
@@ -90,13 +85,11 @@ public class SocksServiceImpl implements SocksService {
 
     private void readFromFile() {
         try {
-            socks = new ObjectMapper().readValue(filesService.readSocks(),
-                    new TypeReference<Map<Sock, Integer>>() {
-                    });
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
+            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<HashMap<Sock, Integer>>() {
+            });
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+
         }
     }
 

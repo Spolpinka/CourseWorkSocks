@@ -47,8 +47,8 @@ public class FilesServiceImpl implements FilesService {
             return Files.readString(Path.of(filesPath, socksFile));
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+        return "";
     }
 
     //метод для очистки файла Socks
