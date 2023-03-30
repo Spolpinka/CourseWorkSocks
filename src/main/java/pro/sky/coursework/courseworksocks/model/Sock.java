@@ -4,11 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
-import java.awt.Color;
+
 
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
 public class Sock {
@@ -21,8 +19,6 @@ public class Sock {
     @NotNull
     @Schema(description = "Состав носков (% хлопка в составе), только целые числа")
     private int composition;
-//необязательное поле для создания сущности
-    @NonNull
     @Schema(description = "Количество пар носков")
     private int quantity;
 
@@ -36,6 +32,10 @@ public class Sock {
 
     @Override
     public int hashCode() {
-        return Objects.hash(color, size, composition);
+        int result = color != null ? color.hashCode() : 0;
+        result = 31 * result + size.hashCode();
+        result = 31 * result + composition;
+        result = 31 * result + quantity;
+        return result;
     }
 }

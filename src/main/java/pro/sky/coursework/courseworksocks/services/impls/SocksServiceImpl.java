@@ -3,6 +3,7 @@ package pro.sky.coursework.courseworksocks.services.impls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.stereotype.Service;
 import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.services.FilesService;
@@ -12,13 +13,16 @@ import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Service
+
 public class SocksServiceImpl implements SocksService {
 
     private final FilesService filesService;
-
-    private static Map<Sock, Integer> socks = new HashMap<>();
+    //@JsonDeserialize
+    private static Map<Integer, Sock> socks = new TreeMap<>();
+    private static int id = 0;
 
     public SocksServiceImpl(FilesService filesService) {
         this.filesService = filesService;
@@ -34,15 +38,27 @@ public class SocksServiceImpl implements SocksService {
     public boolean addSocks(Sock[] newSocks) {
         if (newSocks != null) {
             for (int i = 0; i < newSocks.length; i++) {
-                Integer x = socks.putIfAbsent(newSocks[i], newSocks[i].getQuantity());
+                //проверяем, есть ли уже такие носки в базе
+                if (socks.containsValue(newSocks[i])){
+                    int resultId = searchForIdInSocks(newSocks[i]);//Id уже заведенных носков
+                    int oldQuantity = socks.get(resultId).getQuantity();//для фиксации старого значения количества
+
+                    newSocks[i].setQuantity(newSocks[i].getQuantity() + oldQuantity);
+                    socks.put(resultId, newSocks[i]);
+                } else {
+                    socks.put(id++, newSocks[i]);
+                }
+
+                //если Sock является кллючом, но для этого надо дописывать десериализатор, потому что, видите ли, не можем мы воспринимать кастомные объекты как ключ
+                /*Integer x = socks.putIfAbsent(newSocks[i], newSocks[i].getQuantity());
                 if (x != null) {
                     socks.replace(newSocks[i], x + newSocks[i].getQuantity());
-                }
+                }*/
             }
             saveToFile();
             return true;
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -52,40 +68,41 @@ public class SocksServiceImpl implements SocksService {
             boolean isEnough = true;
             String answer = "";
             for (int i = 0; i < takenSocks.length; i++) {
-                if (!socks.containsKey(takenSocks[i])
-                        || socks.get(takenSocks[i]) < takenSocks[i].getQuantity()) {
+                //если такие носки есть и их количество не меньше запрошенного
+                int takenId = searchForIdInSocks(takenSocks[i]);
+                Sock existingSock = socks.get(takenId);
+                if (socks.containsValue(takenSocks)
+                        && existingSock.getQuantity() >= takenSocks[i].getQuantity()) {
+                    existingSock.setQuantity(existingSock.getQuantity() - takenSocks[i].getQuantity());
+                } else {
                     isEnough = false;
                     answer += "На складе недостаточно носков: " + takenSocks[i].getColor() + "; "
                             + "содержание хлопка - " + takenSocks[i].getComposition() + "%; "
                             + "размер носков " + takenSocks[i].getSize().getValue() + "\n"
                             + "Запрошенное количество - " + takenSocks[i].getQuantity() + ", "
-                            + "в наличии на складе - " + socks.get(takenSocks[i]) + "\n";
+                            + "в наличии на складе - " + existingSock.getQuantity() + "\n";
                 }
             }
             if (!isEnough) {
                 //если недостаточно - посылаем ответ, чего именно недостаточно
                 return answer;
             } else {
-                for (int i = 0; i < takenSocks.length; i++) {
-                    int newQuantity = socks.get(takenSocks[i]) - takenSocks[i].getQuantity();
-                    socks.replace(takenSocks[i], socks.get(takenSocks), takenSocks[i].getQuantity());
-                }
                 saveToFile();
+                return "все носки забраны успешно";
             }
         } else {
             return "false";
         }
-        return "";
     }
 
     @Override
     public Collection<Sock> getAllSocks() {
-        return socks.keySet();
+        return socks.values();
     }
 
     private void readFromFile() {
         try {
-            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<HashMap<Sock, Integer>>() {
+            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<TreeMap<Integer, Sock>>() {
             });
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -100,5 +117,14 @@ public class SocksServiceImpl implements SocksService {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+    }
+
+    private int searchForIdInSocks(Sock sock) {
+        for (Map.Entry<Integer, Sock> entry : socks.entrySet()) {
+            if (entry.getValue().equals(sock)) {
+                return entry.getKey();
+            }
+        }
+        return 0;
     }
 }
