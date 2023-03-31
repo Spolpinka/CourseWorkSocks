@@ -10,15 +10,21 @@ import java.nio.file.Path;
 public interface FilesService {
     boolean saveSocksFile(String json);
 
+    boolean saveTransactionFile(String json);
+
     File getSocksFile();
 
+    File getTransactionFile();
+
     String readSocks();
+
+    String readTransactions();
 
     //метод для очистки файла Socks
     boolean cleanSocksFile();
 
     //метод для очистки файла операций
-    boolean cleanOperationsFile();
+    boolean cleanTransactionsFile();
 
     Path createTempFile(String suffix);
 

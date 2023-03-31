@@ -3,11 +3,13 @@ package pro.sky.coursework.courseworksocks.services.impls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.stereotype.Service;
 import pro.sky.coursework.courseworksocks.model.Sock;
+import pro.sky.coursework.courseworksocks.model.Transaction;
+import pro.sky.coursework.courseworksocks.model.TypeOfTransaction;
 import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.SocksService;
+import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
@@ -20,12 +22,13 @@ import java.util.TreeMap;
 public class SocksServiceImpl implements SocksService {
 
     private final FilesService filesService;
-    //@JsonDeserialize
-    private static Map<Integer, Sock> socks = new TreeMap<>();
+    private final TransactionService transactionService;
+    private static Map<Integer, Sock> socks = new HashMap<>();
     private static int id = 0;
 
-    public SocksServiceImpl(FilesService filesService) {
+    public SocksServiceImpl(FilesService filesService, TransactionService transactionService) {
         this.filesService = filesService;
+        this.transactionService = transactionService;
     }
 
     @PostConstruct
@@ -42,18 +45,14 @@ public class SocksServiceImpl implements SocksService {
                 if (socks.containsValue(newSocks[i])){
                     int resultId = searchForIdInSocks(newSocks[i]);//Id уже заведенных носков
                     int oldQuantity = socks.get(resultId).getQuantity();//для фиксации старого значения количества
-
                     newSocks[i].setQuantity(newSocks[i].getQuantity() + oldQuantity);
                     socks.put(resultId, newSocks[i]);
                 } else {
                     socks.put(id++, newSocks[i]);
                 }
-
-                //если Sock является кллючом, но для этого надо дописывать десериализатор, потому что, видите ли, не можем мы воспринимать кастомные объекты как ключ
-                /*Integer x = socks.putIfAbsent(newSocks[i], newSocks[i].getQuantity());
-                if (x != null) {
-                    socks.replace(newSocks[i], x + newSocks[i].getQuantity());
-                }*/
+//сохраняем транзакцию
+                transactionService.addTransaction(new Transaction(TypeOfTransaction.ADD, newSocks[i].getQuantity(),
+                        newSocks[i].getSize(), newSocks[i].getComposition(), newSocks[i].getColor()));
             }
             saveToFile();
             return true;
@@ -74,6 +73,9 @@ public class SocksServiceImpl implements SocksService {
                 if (socks.containsValue(takenSocks)
                         && existingSock.getQuantity() >= takenSocks[i].getQuantity()) {
                     existingSock.setQuantity(existingSock.getQuantity() - takenSocks[i].getQuantity());
+                    //добавляем транзакцию
+                    transactionService.addTransaction(new Transaction(TypeOfTransaction.PICK_UP, takenSocks[i].getQuantity(),
+                            takenSocks[i].getSize(), takenSocks[i].getComposition(), takenSocks[i].getColor()));
                 } else {
                     isEnough = false;
                     answer += "На складе недостаточно носков: " + takenSocks[i].getColor() + "; "
@@ -102,7 +104,7 @@ public class SocksServiceImpl implements SocksService {
 
     private void readFromFile() {
         try {
-            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<TreeMap<Integer, Sock>>() {
+            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<Map<Integer, Sock>>() {
             });
         } catch (JsonProcessingException e) {
             e.printStackTrace();

@@ -21,7 +21,7 @@ public class FilesServiceImpl implements FilesService {
     private String socksFile;
 
     @Value("${name.of.operations.file}")
-    private String operationsFile;
+    private String transactionsFile;
 
 
     @Override
@@ -35,6 +35,17 @@ public class FilesServiceImpl implements FilesService {
             return false;
         }
     }
+    @Override
+    public boolean saveTransactionFile(String json) {
+        try{
+            cleanTransactionsFile();
+            Files.writeString(Path.of(filesPath, transactionsFile), json);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     @Override
     public File getSocksFile() {
@@ -42,9 +53,24 @@ public class FilesServiceImpl implements FilesService {
     }
 
     @Override
+    public File getTransactionFile() {
+        return new File(filesPath + "/" + transactionsFile);
+    }
+
+    @Override
     public String readSocks() {
         try {
             return Files.readString(Path.of(filesPath, socksFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    @Override
+    public String readTransactions() {
+        try {
+            return Files.readString(Path.of(filesPath, transactionsFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,10 +92,10 @@ public class FilesServiceImpl implements FilesService {
 
     //метод для очистки файла операций
     @Override
-    public boolean cleanOperationsFile() {
+    public boolean cleanTransactionsFile() {
         try {
-            Files.deleteIfExists(Path.of(filesPath, operationsFile));
-            Files.createFile(Path.of(filesPath, operationsFile));
+            Files.deleteIfExists(Path.of(filesPath, transactionsFile));
+            Files.createFile(Path.of(filesPath, transactionsFile));
             return true;
         } catch (IOException e) {
             e.printStackTrace();
