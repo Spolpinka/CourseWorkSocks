@@ -19,7 +19,7 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/socks")
-@Tag(name = "Носки", description = "Все операции с носками (добавление, правка, удаление")
+@Tag(name = "Носки", description = "Все операции с носками (добавление, правка, удаление)")
 public class SocksController {
 
     private final SocksService socksService;
@@ -71,12 +71,6 @@ public class SocksController {
     public ResponseEntity<Void> addSocks(@RequestBody Sock... socks) {
         socksService.addSocks(socks);
         return ResponseEntity.ok().build();
-
-        /*if (socksService.addSocks(socks)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }*/
     }
 
     @Operation(
@@ -126,6 +120,30 @@ public class SocksController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @Operation(
+            summary = "Получение списка всех носков",
+            description = "Получение списка всей базы носков со склада"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Список носков успешно получен",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = Sock.class))
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Список носков пуст / не получен"
+                    )
+            }
+
+    )
 
     @GetMapping
     public ResponseEntity<Collection<Sock>> getAllSocks() {

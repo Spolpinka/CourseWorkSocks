@@ -11,7 +11,7 @@ public enum Colors {
     YELLOW("Желтый"),
     VIOLET("Фиолетовый");
 
-    private String color;
+    private final String color;
 
     Colors(String color) {
         this.color = color;
