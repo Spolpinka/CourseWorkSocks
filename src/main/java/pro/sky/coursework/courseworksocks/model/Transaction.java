@@ -27,7 +27,9 @@ public class Transaction {
 
     public Transaction(TypeOfTransaction type, int quantity, Sizes size, int composition, Colors color) {
         this.type = type;
-        this.localDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy-HH:mm"));
+        this.localDate = LocalDate.now().getDayOfMonth() + ":"
+                + LocalDate.now().getMonth() + ":"
+                + LocalDate.now().getYear();
         this.quantity = quantity;
         this.size = size;
         this.composition = composition;
