@@ -12,4 +12,8 @@ public interface SocksService {
     String pickUpSocks(Sock[] takenSocks);
 
     Collection<Sock> getAllSocks();
+
+    Collection<Sock> getSocks(String color, float size, int cottonMin, int cottonMax);
+
+    boolean deleteSocks(Sock[] deletedSocks);
 }

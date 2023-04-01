@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import pro.sky.coursework.courseworksocks.model.Colors;
 import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.model.Transaction;
 import pro.sky.coursework.courseworksocks.model.TypeOfTransaction;
@@ -14,8 +15,8 @@ import pro.sky.coursework.courseworksocks.services.TransactionService;
 import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 
@@ -65,7 +66,7 @@ public class SocksServiceImpl implements SocksService {
         if (takenSocks != null) {
             //проверяем наличие
             boolean isEnough = true;
-            String answer = "";
+            StringBuilder answer = new StringBuilder();
             for (int i = 0; i < takenSocks.length; i++) {
                 //если такие носки есть и их количество не меньше запрошенного
                 int takenId = searchForIdInSocks(takenSocks[i]);
@@ -78,16 +79,20 @@ public class SocksServiceImpl implements SocksService {
                             takenSocks[i].getSize(), takenSocks[i].getComposition(), takenSocks[i].getColor()));
                 } else {
                     isEnough = false;
-                    answer += "На складе недостаточно носков: " + takenSocks[i].getColor() + "; "
-                            + "содержание хлопка - " + takenSocks[i].getComposition() + "%; "
-                            + "размер носков " + takenSocks[i].getSize().getValue() + "\n"
-                            + "Запрошенное количество - " + takenSocks[i].getQuantity() + ", "
-                            + "в наличии на складе - " + existingSock.getQuantity() + "\n";
+                    answer.append("На складе недостаточно носков: ")
+                            .append(takenSocks[i].getColor()).append("; ")
+                            .append("содержание хлопка - ")
+                            .append(takenSocks[i].getComposition()).append("%; ")
+                            .append("размер носков ")
+                            .append(takenSocks[i].getSize().getValue()).append("\n")
+                            .append("Запрошенное количество - ")
+                            .append(takenSocks[i].getQuantity()).append(", ")
+                            .append("в наличии на складе - ").append(existingSock.getQuantity()).append("\n");
                 }
             }
             if (!isEnough) {
                 //если недостаточно - посылаем ответ, чего именно недостаточно
-                return answer;
+                return answer.toString();
             } else {
                 saveToFile();
                 return "все носки забраны успешно";
@@ -100,6 +105,38 @@ public class SocksServiceImpl implements SocksService {
     @Override
     public Collection<Sock> getAllSocks() {
         return socks.values();
+    }
+
+    @Override
+    public Collection<Sock> getSocks(String color, float size, int cottonMin, int cottonMax) {
+        Collection<Sock> result = new HashSet<>();
+        for (Sock sock :
+                socks.values()) {
+            if (sock.getColor() == Colors.valueOf(color.toUpperCase()) &&
+                    sock.getSize().getValue() == size &&
+                    sock.getComposition() >= cottonMin &&
+                    sock.getComposition() <= cottonMax) {
+                result.add(sock);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean deleteSocks(Sock[] deletedSocks) {
+        for (Sock deletedSock :
+                deletedSocks) {
+            if (socks.containsValue(deletedSock)) {
+                Sock neededSock = socks.get(searchForIdInSocks(deletedSock));
+                int newQuantity = neededSock.getQuantity() - deletedSock.getQuantity();
+                if (newQuantity >= 0) {
+                    neededSock.setQuantity(newQuantity);
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void readFromFile() {

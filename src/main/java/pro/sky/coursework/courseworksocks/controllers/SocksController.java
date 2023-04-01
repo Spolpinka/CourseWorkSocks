@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pro.sky.coursework.courseworksocks.model.Colors;
+import pro.sky.coursework.courseworksocks.model.Sizes;
 import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.services.SocksService;
 
@@ -40,7 +43,6 @@ public class SocksController {
                             description = "объекты sock в формате JSON которые будут добавлены в базу",
                             content = {
                                     @Content(
-                                            mediaType = "application/json",
                                             array = @ArraySchema(schema = @Schema(implementation = Sock.class))
                                     )
                             }
@@ -154,5 +156,84 @@ public class SocksController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/concreteSocks")
+    @Operation(
+            summary = "Получение списка носков по параметрам",
+            description = "Задаем параметры цвет, размер, минимально и максимальное содержание хлопка, " +
+                    "и получаем список носков, удовлетворяющих этим признакам."
+    )
+    @Parameters(
+            value = {
+                    @Parameter(
+                            name = "color",
+                            description = "Цвет носков",
+                            content = {
+                                    @Content(
+                                            schema = @Schema(implementation = Colors.class)
+                                    )
+                            }
+
+                    ),
+                    @Parameter(
+                            name = "size",
+                            description = "размер носков от 26 - 46.5",
+                            content = {
+                                    @Content(
+                                            schema = @Schema(implementation = Sizes.class)
+                                    )
+                            }
+
+                    ),
+                    @Parameter(
+                            name = "cottonMin",
+                            description = "минимальное значение содержания хлопка 0 - 100"
+                    ),
+                    @Parameter(
+                            name = "cottonMin",
+                            description = "максимальное значение содержания хлопка 0 - 100"
+                    )
+            }
+    )
+    public ResponseEntity<Collection<Sock>> getConcreteSocks(@RequestParam String color,
+                                                             @RequestParam float size,
+                                                             @RequestParam int cottonMin,
+                                                             @RequestParam int cottonMax) {
+
+        Collection<Sock> socks = socksService.getSocks(color, size, cottonMin, cottonMax);
+        if (socks.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else {
+            return ResponseEntity.ok(socks);
+        }
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(
+            summary = "Списание некондиции",
+            description = "Списываем (уничтожаем) бракованные носки"
+    )
+    @Parameters(
+            value = {
+                    @Parameter(
+                            name = "socks",
+                            description = "объекты sock в формате JSON которые будут списаны со склада",
+                            content = {
+                                    @Content(
+                                            schema = @Schema(implementation = Sock.class)
+                                    )
+                            }
+
+                    )
+            }
+    )
+    public ResponseEntity<Void> deleteSocks(@RequestBody Sock... socks) {
+        if (socksService.deleteSocks(socks)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
 
 }
