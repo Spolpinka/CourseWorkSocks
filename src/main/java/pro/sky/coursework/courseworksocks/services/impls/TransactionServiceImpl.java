@@ -10,9 +10,9 @@ import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -38,6 +38,11 @@ public class TransactionServiceImpl implements TransactionService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public Collection<Transaction> getAllTransactions() {
+        return transactions.values();
     }
 
     private void readFromFile() {
