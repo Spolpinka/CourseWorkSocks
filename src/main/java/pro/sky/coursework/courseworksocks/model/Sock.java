@@ -19,6 +19,7 @@ public class Sock {
     @NotNull
     @Schema(description = "Состав носков (% хлопка в составе), только целые числа")
     private int composition;
+
     @Schema(description = "Количество пар носков")
     private int quantity;
 
@@ -32,10 +33,9 @@ public class Sock {
 
     @Override
     public int hashCode() {
-        int result = color != null ? color.hashCode() : 0;
+        int result = color.hashCode();
         result = 31 * result + size.hashCode();
         result = 31 * result + composition;
-        result = 31 * result + quantity;
         return result;
     }
 }

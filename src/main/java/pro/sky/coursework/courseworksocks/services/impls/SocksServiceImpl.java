@@ -70,7 +70,7 @@ public class SocksServiceImpl implements SocksService {
                 //если такие носки есть и их количество не меньше запрошенного
                 int takenId = searchForIdInSocks(takenSocks[i]);
                 Sock existingSock = socks.get(takenId);
-                if (socks.containsValue(takenSocks)
+                if (socks.containsValue(takenSocks[i])
                         && existingSock.getQuantity() >= takenSocks[i].getQuantity()) {
                     existingSock.setQuantity(existingSock.getQuantity() - takenSocks[i].getQuantity());
                     //добавляем транзакцию

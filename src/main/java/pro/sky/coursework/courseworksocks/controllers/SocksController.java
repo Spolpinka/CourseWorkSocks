@@ -112,7 +112,7 @@ public class SocksController {
 
     )
     @PostMapping(value = "/pickUpSocks", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> pickUpSocks(Sock... socks) {
+    public ResponseEntity<String> pickUpSocks(@RequestBody Sock... socks) {
         String s = socksService.pickUpSocks(socks);
         if (!s.equals("не найдено")) {
             return ResponseEntity.ok(s);
