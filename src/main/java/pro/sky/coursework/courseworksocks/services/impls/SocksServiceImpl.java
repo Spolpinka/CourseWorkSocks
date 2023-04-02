@@ -16,8 +16,10 @@ import pro.sky.coursework.courseworksocks.services.SocksService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
-import java.time.Month;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 @Service
 
@@ -44,7 +46,7 @@ public class SocksServiceImpl implements SocksService {
         if (newSocks != null) {
             for (int i = 0; i < newSocks.length; i++) {
                 //проверяем, есть ли уже такие носки в базе
-                if (socks.containsValue(newSocks[i])){
+                if (socks.containsValue(newSocks[i])) {
                     int resultId = searchForIdInSocks(newSocks[i]);//Id уже заведенных носков
                     int oldQuantity = socks.get(resultId).getQuantity();//для фиксации старого значения количества
                     newSocks[i].setQuantity(newSocks[i].getQuantity() + oldQuantity);
@@ -52,7 +54,7 @@ public class SocksServiceImpl implements SocksService {
                 } else {
                     socks.put(id++, newSocks[i]);
                 }
-//сохраняем транзакцию
+                //сохраняем транзакцию
                 transactionService.addTransaction(new Transaction(TypeOfTransaction.ADD, newSocks[i].getQuantity(),
                         newSocks[i].getSize(), newSocks[i].getComposition(), newSocks[i].getColor()));
             }
@@ -69,9 +71,9 @@ public class SocksServiceImpl implements SocksService {
             boolean isEnough = true;
             StringBuilder answer = new StringBuilder();
             for (int i = 0; i < takenSocks.length; i++) {
-                //если такие носки есть и их количество не меньше запрошенного
                 int takenId = searchForIdInSocks(takenSocks[i]);
                 Sock existingSock = socks.get(takenId);
+                //если такие носки есть и их количество не меньше запрошенного
                 if (socks.containsValue(takenSocks[i])
                         && existingSock.getQuantity() >= takenSocks[i].getQuantity()) {
                     existingSock.setQuantity(existingSock.getQuantity() - takenSocks[i].getQuantity());
@@ -147,7 +149,8 @@ public class SocksServiceImpl implements SocksService {
     private void readFromFile() {
         try {
             //распознаем из файла объект класса DataFile, в котором записаны наши данные
-            DataFile dataFile = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<>(){});
+            DataFile dataFile = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<>() {
+            });
             //берем из объекта коллекцию носков и последний id
             socks = dataFile.socks;
             id = dataFile.lastId++;

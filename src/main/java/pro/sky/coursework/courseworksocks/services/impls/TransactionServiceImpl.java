@@ -12,10 +12,8 @@ import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
-import java.time.Month;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
@@ -51,10 +49,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void readFromFile() {
         try {
-            DataFile dataFile = new ObjectMapper().readValue(filesService.readTransactions(), new TypeReference<DataFile>() {
+            DataFile dataFile = new ObjectMapper().readValue(filesService.readTransactions(), new TypeReference<>() {
             });
             transactions = dataFile.transactions;
-            transId = dataFile.lastId;
+            transId = dataFile.lastId++;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
 

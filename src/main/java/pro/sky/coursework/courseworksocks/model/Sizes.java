@@ -57,4 +57,14 @@ public enum Sizes {
     public double getValue() {
         return value;
     }
+
+    public Sizes getValueByDigits(float size) {
+        for (Sizes sizeObj :
+                Sizes.values()) {
+            if (sizeObj.value == size){
+                return sizeObj;
+            }
+        }
+        return null;
+    }
 }

@@ -54,25 +54,26 @@ public class SocksController {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Носки успешно добавлены",
-                            content = {
-                                    @Content(
-                                            mediaType = "application/json",
-                                            array = @ArraySchema(schema = @Schema(implementation = Sock.class))
-                                    )
-                            }
+                            description = "удалось добавить приход"
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Добавление не удалось"
+                            responseCode = "400",
+                            description = "параметры запроса отсутствуют или имеют некорректный формат"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "произошла ошибка, не зависящая от вызывающей стороны"
                     )
             }
 
     )
     @PutMapping(value = "/addSocks")
     public ResponseEntity<Void> addSocks(@RequestBody Sock... socks) {
-        socksService.addSocks(socks);
-        return ResponseEntity.ok().build();
+        if (socksService.addSocks(socks)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @Operation(
@@ -83,7 +84,7 @@ public class SocksController {
             value = {
                     @Parameter(
                             name = "socks",
-                            description = "объекты sock в формате JSON которые будут добавлены в базу",
+                            description = "носки в формате JSON, которые будут забраны со склада",
                             content = {
                                     @Content(
                                             mediaType = "application/json",
@@ -98,17 +99,16 @@ public class SocksController {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Носки успешно забраны",
-                            content = {
-                                    @Content(
-                                            mediaType = "application/json",
-                                            array = @ArraySchema(schema = @Schema(implementation = Sock.class))
-                                    )
-                            }
+                            description = "удалось произвести отпуск носков со склада"
+
                     ),
                     @ApiResponse(
-                            responseCode = "404",
-                            description = "Забор не удался"
+                            responseCode = "400",
+                            description = "товара нет на складе в нужном количестве или параметры запроса имеют некорректный формат"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "произошла ошибка, не зависящая от вызывающей стороны"
                     )
             }
 
@@ -119,7 +119,7 @@ public class SocksController {
         if (!s.equals("не найдено")) {
             return ResponseEntity.ok(s);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -131,16 +131,10 @@ public class SocksController {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Список носков успешно получен",
-                            content = {
-                                    @Content(
-                                            mediaType = "application/json",
-                                            array = @ArraySchema(schema = @Schema(implementation = Sock.class))
-                                    )
-                            }
+                            description = "Список носков успешно получен"
                     ),
                     @ApiResponse(
-                            responseCode = "404",
+                            responseCode = "400",
                             description = "Список носков пуст / не получен"
                     )
             }
@@ -190,15 +184,31 @@ public class SocksController {
                             description = "минимальное значение содержания хлопка 0 - 100"
                     ),
                     @Parameter(
-                            name = "cottonMin",
+                            name = "cottonMax",
                             description = "максимальное значение содержания хлопка 0 - 100"
+                    )
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "носки по запросу получены"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "параметры запроса отсутствуют или имеют некорректный формат"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "произошла ошибка, не зависящая от вызывающей стороны"
                     )
             }
     )
     public ResponseEntity<Collection<Sock>> getConcreteSocks(@RequestParam String color,
                                                              @RequestParam float size,
-                                                             @RequestParam int cottonMin,
-                                                             @RequestParam int cottonMax) {
+                                                             @RequestParam(required = false, defaultValue = "0") int cottonMin,
+                                                             @RequestParam(required = false, defaultValue = "100") int cottonMax) {
 
         Collection<Sock> socks = socksService.getSocks(color, size, cottonMin, cottonMax);
         if (socks.isEmpty()) {
@@ -224,6 +234,22 @@ public class SocksController {
                                     )
                             }
 
+                    )
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "запрос выполнен, товар списан со склада"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "параметры запроса отсутствуют или имеют некорректный формат"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "произошла ошибка, не зависящая от вызывающей стороны"
                     )
             }
     )
