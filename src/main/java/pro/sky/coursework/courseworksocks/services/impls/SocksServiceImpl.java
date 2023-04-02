@@ -3,6 +3,9 @@ package pro.sky.coursework.courseworksocks.services.impls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import pro.sky.coursework.courseworksocks.model.Colors;
 import pro.sky.coursework.courseworksocks.model.Sock;
@@ -13,10 +16,8 @@ import pro.sky.coursework.courseworksocks.services.SocksService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.time.Month;
+import java.util.*;
 
 @Service
 
@@ -145,8 +146,11 @@ public class SocksServiceImpl implements SocksService {
 
     private void readFromFile() {
         try {
-            socks = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<Map<Integer, Sock>>() {
-            });
+            //распознаем из файла объект класса DataFile, в котором записаны наши данные
+            DataFile dataFile = new ObjectMapper().readValue(filesService.readSocks(), new TypeReference<>(){});
+            //берем из объекта коллекцию носков и последний id
+            socks = dataFile.socks;
+            id = dataFile.lastId++;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
 
@@ -155,7 +159,8 @@ public class SocksServiceImpl implements SocksService {
 
     private void saveToFile() {
         try {
-            String s = new ObjectMapper().writeValueAsString(socks);
+            DataFile dataFile = new DataFile(id, socks);
+            String s = new ObjectMapper().writeValueAsString(dataFile);
             filesService.saveSocksFile(s);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -169,5 +174,13 @@ public class SocksServiceImpl implements SocksService {
             }
         }
         return 0;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class DataFile {
+        private int lastId;
+        private Map<Integer, Sock> socks;
     }
 }

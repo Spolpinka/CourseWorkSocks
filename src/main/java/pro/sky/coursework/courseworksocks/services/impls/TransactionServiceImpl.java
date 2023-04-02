@@ -3,15 +3,19 @@ package pro.sky.coursework.courseworksocks.services.impls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
-import pro.sky.coursework.courseworksocks.model.Sock;
 import pro.sky.coursework.courseworksocks.model.Transaction;
 import pro.sky.coursework.courseworksocks.services.FilesService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
+import java.time.Month;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
@@ -47,8 +51,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void readFromFile() {
         try {
-            transactions = new ObjectMapper().readValue(filesService.readTransactions(), new TypeReference<Map<Integer, Transaction>>() {
+            DataFile dataFile = new ObjectMapper().readValue(filesService.readTransactions(), new TypeReference<DataFile>() {
             });
+            transactions = dataFile.transactions;
+            transId = dataFile.lastId;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
 
@@ -57,10 +63,19 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void saveToFile() {
         try {
-            String s = new ObjectMapper().writeValueAsString(transactions);
+            DataFile dataFile = new DataFile(transId, transactions);
+            String s = new ObjectMapper().writeValueAsString(dataFile);
             filesService.saveTransactionFile(s);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class DataFile {
+        private int lastId;
+        private Map<Integer, Transaction> transactions;
     }
 }
