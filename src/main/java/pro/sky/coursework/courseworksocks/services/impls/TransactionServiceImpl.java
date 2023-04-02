@@ -32,7 +32,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean addTransaction(Transaction transaction) {
         if (transaction != null) {
-            transactions.put(transId, transaction);
+            transactions.put(transId++, transaction);
             saveToFile();
             return true;
         } else {

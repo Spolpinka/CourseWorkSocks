@@ -75,8 +75,12 @@ public class SocksServiceImpl implements SocksService {
                         && existingSock.getQuantity() >= takenSocks[i].getQuantity()) {
                     existingSock.setQuantity(existingSock.getQuantity() - takenSocks[i].getQuantity());
                     //добавляем транзакцию
-                    transactionService.addTransaction(new Transaction(TypeOfTransaction.PICK_UP, takenSocks[i].getQuantity(),
-                            takenSocks[i].getSize(), takenSocks[i].getComposition(), takenSocks[i].getColor()));
+                    if (transactionService.addTransaction(new Transaction(TypeOfTransaction.PICK_UP, takenSocks[i].getQuantity(),
+                            takenSocks[i].getSize(), takenSocks[i].getComposition(), takenSocks[i].getColor()))) {
+                        System.out.println("Транзакция отправлена на добавление!");
+                    } else {
+                        System.out.println("Транзакция не прошла на добавление!");
+                    }
                 } else {
                     isEnough = false;
                     answer.append("На складе недостаточно носков: ")
