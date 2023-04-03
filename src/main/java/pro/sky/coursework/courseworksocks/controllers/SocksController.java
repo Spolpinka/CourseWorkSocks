@@ -268,7 +268,11 @@ public class SocksController {
     }
 
     @GetMapping("/downloadSockBase")
-    public ResponseEntity<Object> getSockBaseInJson(){
+    @Operation(
+            summary = "Скачать все носки в наличии на складе",
+            description = "Скачивается вся база носков в удобочитаемом виде txt"
+    )
+    public ResponseEntity<Object> getSockBaseInTxt(){
         try {
             Path path = socksService.createSockBaseForDownload();
             if (Files.size(path) == 0) {
@@ -276,9 +280,9 @@ public class SocksController {
             }
             InputStreamResource isr = new InputStreamResource(new FileInputStream(path.toFile()));
             return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.TEXT_PLAIN)
                     .contentLength(Files.size(path))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"AllSockBase.json\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"AllSock.txt\"")
                     .body(isr);
         } catch (IOException e) {
             e.printStackTrace();

@@ -11,13 +11,13 @@ public enum Colors {
     YELLOW("Желтый"),
     VIOLET("Фиолетовый");
 
-    private final String color;
+    private final String text;
 
-    Colors(String color) {
-        this.color = color;
+    Colors(String text) {
+        this.text = text;
     }
 
-    public String getColor() {
-        return color;
+    public String getText() {
+        return text;
     }
 }

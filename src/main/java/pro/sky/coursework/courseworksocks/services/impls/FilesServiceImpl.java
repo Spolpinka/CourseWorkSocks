@@ -106,7 +106,7 @@ public class FilesServiceImpl implements FilesService {
     @Override
     public Path createTempFile(String suffix) {
         try {
-            return Files.createTempFile(Path.of(filesPath, socksFile), "tempFile", suffix);
+            return Files.createTempFile(Path.of(filesPath), "tempFile", suffix);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException();

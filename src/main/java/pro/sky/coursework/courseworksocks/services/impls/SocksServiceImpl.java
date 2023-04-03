@@ -16,8 +16,7 @@ import pro.sky.coursework.courseworksocks.services.SocksService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -188,9 +187,44 @@ public class SocksServiceImpl implements SocksService {
     public Path createSockBaseForDownload() {
         Path path = filesService.createTempFile("SockBase");
         try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND)) {
-            writer.append(filesService.readSocks());
+            writer.append("В наличии на складе:\n");
+            for (Sock sock :
+                    socks.values()) {
+                writer.append("Цвет носков: ").append(sock.getColor().getText()).append("\n")
+                        .append("Размер: ").append(String.valueOf(sock.getSize().getValue())).append("\n")
+                        .append("Процент содержания хлопка: ").append(String.valueOf(sock.getComposition())).append("\n")
+                        .append("Общее количество таких носков - ").append(String.valueOf(sock.getQuantity())).append("\n\n");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return path;
+    }
+
+    @Override
+    public void importBase(InputStream inputStream) {
+        try {
+            Path path = createTempFileForImport(inputStream);
+            DataFile dataFile = new ObjectMapper().readValue(Files.readString(path), new TypeReference<>() {
+            });
+            //берем из объекта коллекцию носков и последний id
+            socks = dataFile.socks;
+            id = dataFile.lastId++;
+            saveToFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Path createTempFileForImport(InputStream inputStream) throws IOException {
+        Path path = filesService.createTempFile("tmpBase");
+        try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND)) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                writer.append(line);
+            }
         }
         return path;
     }
