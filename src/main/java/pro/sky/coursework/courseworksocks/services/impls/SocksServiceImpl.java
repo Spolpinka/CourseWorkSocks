@@ -142,6 +142,13 @@ public class SocksServiceImpl implements SocksService {
                 int newQuantity = neededSock.getQuantity() - deletedSock.getQuantity();
                 if (newQuantity >= 0) {
                     neededSock.setQuantity(newQuantity);
+                    //добавляем транзакцию
+                    if (transactionService.addTransaction(new Transaction(TypeOfTransaction.DELETE, deletedSock.getQuantity(),
+                            deletedSock.getSize(), deletedSock.getComposition(), deletedSock.getColor()))) {
+                        System.out.println("Транзакция отправлена на добавление!");
+                    } else {
+                        System.out.println("Транзакция не прошла на добавление!");
+                    }
                 } else {
                     return false;
                 }
