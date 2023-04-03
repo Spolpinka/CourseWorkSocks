@@ -16,6 +16,11 @@ import pro.sky.coursework.courseworksocks.services.SocksService;
 import pro.sky.coursework.courseworksocks.services.TransactionService;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,6 +182,17 @@ public class SocksServiceImpl implements SocksService {
             }
         }
         return 0;
+    }
+
+    @Override
+    public Path createSockBaseForDownload() {
+        Path path = filesService.createTempFile("SockBase");
+        try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND)) {
+            writer.append(filesService.readSocks());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
     }
 
     @Data
