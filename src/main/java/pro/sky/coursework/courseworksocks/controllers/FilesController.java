@@ -1,6 +1,11 @@
 package pro.sky.coursework.courseworksocks.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +35,31 @@ public class FilesController {
             summary = "Импорт базы данных носков",
             description = "Полное замещение существующей базы носков из предоставляемого файла"
     )
+    @Parameters(
+            value = {
+                    @Parameter(
+                            name = "file",
+                            style = ParameterStyle.DEEPOBJECT,
+                            description = "файл, содержащий базу носков в формате JSON"
+                    )
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                      responseCode = "200",
+                      description = "база загружена успешно"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "переданы ошибочные данные / неверный формат данных"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "ошибка, не зависящая от пользователя"
+                    )
+            }
+    )
     public ResponseEntity<Void> uploadSocksBase(@RequestParam MultipartFile file) {
         if (filesService.uploadSocksFile(file)) {
             return ResponseEntity.ok().build();
@@ -42,6 +72,22 @@ public class FilesController {
     @Operation(
             summary = "Выгрузка актуальной базы носков",
             description = "Вся база носков выгружается в том виде, в котором она хранится в программе"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "база выгружена успешно"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "база данных отсутствует"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "ошибка, не зависящая от пользователя"
+                    )
+            }
     )
     public ResponseEntity<InputStreamResource> downloadDataFile() throws FileNotFoundException {
         File file = filesService.getSocksFile();
