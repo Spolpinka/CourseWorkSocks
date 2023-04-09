@@ -18,7 +18,7 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/transaction")
-@Tag(name = "Транзакции", description = "Операции с транзакциями")
+@Tag(name = "Транзакции", description = "Операции с транзакциями (пока выгрузка всех транзакций)")
 public class TransactionController {
     private final TransactionService transactionService;
 
